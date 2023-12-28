@@ -1,0 +1,87 @@
+package jdbc_10_2_3;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class Main {
+
+    public static void main(String[] args) {
+        // Define all possible boolean values
+        boolean[] readOnlyValues = {true, false};
+        boolean[] useEncryptionValues = {true, false};
+        boolean[] trustServerCertificateValues = { true };
+        boolean[] multipleActiveResultSetsValues = {true, false};
+        boolean[] transparentNetworkIPResolutionValues = {true, false};
+        boolean[] autoCommitValues = {true, false};
+        int[] isolationLevels = {Connection.TRANSACTION_READ_UNCOMMITTED,
+                Connection.TRANSACTION_READ_COMMITTED,
+                Connection.TRANSACTION_REPEATABLE_READ,
+                Connection.TRANSACTION_SERIALIZABLE};
+        boolean[] useUnicodeValues = {true, false};
+
+        // Iterate over all combinations of boolean values
+        for (boolean readOnly : readOnlyValues) {
+            for (boolean useEncryption : useEncryptionValues) {
+                for (boolean trustServerCertificate : trustServerCertificateValues) {
+                    for (boolean multipleActiveResultSets : multipleActiveResultSetsValues) {
+                        for (boolean transparentNetworkIPResolution : transparentNetworkIPResolutionValues) {
+                            for (boolean autoCommit : autoCommitValues) {
+                                for (int isolationLevel : isolationLevels) {
+                                    for (boolean useUnicode : useUnicodeValues) {
+                                        // Create the URL with the current combination of boolean values
+                                        String applicationIntent = readOnly ? ";applicationIntent=ReadOnly" : "";
+                                        String url = "jdbc:sqlserver://20.93.183.122:1234;databaseName=company;" + applicationIntent +
+                                                ";useEncryption=" + useEncryption +
+                                                ";trustServerCertificate=" + trustServerCertificate +
+                                                ";multipleActiveResultSets=" + multipleActiveResultSets +
+                                                ";TransparentNetworkIPResolution=" + transparentNetworkIPResolution +
+                                        String user = "sa";
+                                        String password = "Password123";
+
+                                        // SQL query
+                                        String sqlQuery = "SELECT * FROM employees";
+
+                                        try {
+                                            // Load the JDBC driver
+                                            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+                                            // Establish the connection
+                                            try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                                                // Create a PreparedStatement for the SQL query
+                                                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+                                                    // Execute the query and retrieve the result set
+                                                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                                                        // Iterate through the result set and print the values
+                                                        while (resultSet.next()) {
+                                                            System.out.println("Connection Parameters: " +
+                                                                    "ReadOnly=" + readOnly +
+                                                                    ", UseEncryption=" + useEncryption +
+                                                                    ", TrustServerCertificate=" + trustServerCertificate +
+                                                                    ", MultipleActiveResultSets=" + multipleActiveResultSets +
+                                                                    ", TransparentNetworkIPResolution=" + transparentNetworkIPResolution);
+                                                            System.out.println("Employee ID: " + resultSet.getInt("employee_id") +
+                                                                    ", Name: " + resultSet.getString("name") +
+                                                                    ", Department: " + resultSet.getInt("age") +
+                                                                    ", Salaey: " + resultSet.getInt("salary"));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } catch (SQLException se) {
+                                            se.printStackTrace();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

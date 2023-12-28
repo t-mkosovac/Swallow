@@ -1,0 +1,22 @@
+package jdbc_runner;
+
+public class Main {
+
+	public static void main(String[] args) {
+        try {
+            // Dynamically load the main class of the selected project
+        	Class<?> projectClass = Class.forName("jdbc_10_2_3.Main");
+            
+            // Get the main method
+            java.lang.reflect.Method method = projectClass.getMethod("main", String[].class);
+            
+            // Invoke the main method
+            method.invoke(null, (Object) new String[]{});
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to run the selected project.");
+        }
+
+	}
+
+}

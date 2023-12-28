@@ -1,0 +1,51 @@
+package jdbc_runner;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+public class Runner {
+    public static void main(String[] args) {
+        try {
+            // Specify the command to run the other project's main method
+        	ProcessBuilder processBuilder = new ProcessBuilder(
+        		    "java", 
+        		    "-cp", "C:\\Users\\t-mkosovac\\eclipse-workspace\\jdbc_10_2_3\\bin;"
+        		    		+ "C:\\Users\\t-mkosovac\\Downloads\\json-simple-1.1.jar;"
+        		    		+ "C:\\Users\\t-mkosovac\\Downloads\\sqljdbc_10.2.3.0_enu\\sqljdbc_10.2enu\\mssql-jdbc-10.2.3.jre8.jar",
+        		    "jdbc_10_2_3.JDBC_10_2_3"
+        		);
+
+            // Start the process
+            Process process = processBuilder.start();
+
+            // You can also read the output or error streams of the process if needed
+            // Uncomment the following lines if you want to read the output
+            InputStream inputStream = process.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                 System.out.println(line);
+             }
+
+            // Uncomment the following lines if you want to read the error
+            // InputStream errorStream = process.getErrorStream();
+            // BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+            // String error;
+            // while ((error = errorReader.readLine()) != null) {
+            //     System.err.println(error);
+            // }
+
+            // Wait for the process to finish
+            int exitCode = process.waitFor();
+
+            // Print the exit code
+            System.out.println("Process exited with code: " + exitCode);
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+

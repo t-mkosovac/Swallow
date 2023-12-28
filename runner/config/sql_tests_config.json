@@ -1,0 +1,29 @@
+{
+  "drivers": ["cs_5.1.2"],
+  "endpoints": [
+    {
+      "server": "4.245.92.227",
+      "port": 1433,
+      "database": "company",
+      "username": "sa",
+      "password": "Password123",
+      "options": {
+        "useEncryption": [true, false],
+        "trustServerCertificate": [true],
+        "readOnly": [true, false]
+      }
+    },
+    {
+      "server": "20.56.242.157",
+      "port": 1433,
+      "database": "company",
+      "username": "sa",
+      "password": "Password12",
+      "options": {
+        "useEncryption": [true, false],
+        "trustServerCertificate": [true],
+        "readOnly": [true, false]
+      }
+    }
+  ]
+}

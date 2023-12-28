@@ -1,0 +1,11 @@
+/**
+ * 
+ */
+/**
+ * 
+ */
+module jdbc_10_2_3 {
+	requires java.sql;
+	requires json.simple;
+	exports jdbc_10_2_3;
+}

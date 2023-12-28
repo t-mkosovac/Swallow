@@ -1,0 +1,9 @@
+/**
+ * 
+ */
+/**
+ * 
+ */
+module jdbc_runner {
+	requires jdbc_10_2_3;
+}

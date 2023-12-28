@@ -1,0 +1,45 @@
+package jdbc_11_2_3;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+public class Main {
+
+	public static void main(String[] args) {
+		String url = "jdbc:sqlserver://20.93.183.122:1234;databaseName=company;encrypt=true;trustServerCertificate=true";
+        String user = "sa";
+        String password = "Password123";
+
+        // SQL query
+        String sqlQuery = "SELECT * FROM employees";
+        
+
+        try {
+            // Load the JDBC driver
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
+            // Establish the connection
+            try (Connection connection = DriverManager.getConnection(url, user, password)) {
+                // Create a PreparedStatement for the SQL query
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+                    // Execute the query and retrieve the result set
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        // Iterate through the result set and print the values
+                        while (resultSet.next()) {
+                            System.out.println("Employee ID: " + resultSet.getInt("employee_id") +
+                                    ", Name: " + resultSet.getString("name") +
+                                    ", Department: " + resultSet.getInt("age") +
+                            		", Salaey: " + resultSet.getInt("salary"));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+	}
+
+}

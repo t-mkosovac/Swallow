@@ -1,0 +1,11 @@
+package jdbc_runner;
+
+import jdbc_10_2_3.Main;
+
+public class Main {
+
+	public static void main(String[] args) {
+		jdbc_10_2_3.Main.main();
+	}
+
+}

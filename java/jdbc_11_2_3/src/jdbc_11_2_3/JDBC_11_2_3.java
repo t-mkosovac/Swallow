@@ -1,0 +1,140 @@
+package jdbc_11_2_3;
+
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.Queue;
+import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+public class JDBC_11_2_3 {
+
+    public static void main(String[] args) {
+        JSONParser parser = new JSONParser();
+
+        try {
+            JSONObject config = (JSONObject) parser.parse(new FileReader(args[0])); // path to the config file
+
+            JSONArray endpoints = (JSONArray) config.get("endpoints");
+
+            // Iterate through each endpoint
+            for (Object endpointObj : endpoints) {
+                JSONObject endpoint = (JSONObject) endpointObj;
+                String server = (String) endpoint.get("server");
+                int port = ((Long) endpoint.get("port")).intValue();
+                String databaseName = (String) endpoint.get("database");
+                String user = (String) endpoint.get("username");
+                String password = (String) endpoint.get("password");
+
+                JSONObject endpointConfig = (JSONObject) endpoint.get("options");
+
+                // Iterate through each combination of boolean values
+                iterateAttributes(endpointConfig, values -> {
+                    // Use the current combination of boolean values
+                    String url = buildConnectionString(server, port, databaseName, user, password, values);
+                    // Perform database connection test with the current configuration
+                    performDatabaseTest(url);
+                });
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void iterateAttributes(JSONObject config, Consumer<Map<String, Object>> attributeConsumer) {
+        Queue<Map<String, Object>> queue = new LinkedList<>();
+        queue.add(new HashMap<>()); // Start with an empty configuration
+
+        // Iterate through each attribute in the configuration
+        for (Object entryObj : config.entrySet()) {
+            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
+            String attributeName = entry.getKey();
+            JSONArray values = (JSONArray) entry.getValue();
+
+            // Create a list to hold the configurations at this level
+            List<Map<String, Object>> currentLevelConfigurations = new ArrayList<>(queue);
+
+            // Clear the queue for the next level of configurations
+            queue.clear();
+
+            // Iterate through each existing configuration and add new configurations with
+            // the current attribute
+            for (Map<String, Object> currentConfig : currentLevelConfigurations) {
+                for (Object valueObj : values) {
+                    Map<String, Object> newConfig = new HashMap<>(currentConfig);
+                    newConfig.put(attributeName, valueObj);
+                    queue.add(newConfig);
+                }
+            }
+        }
+
+        // Execute the consumer for each final configuration
+        while (!queue.isEmpty()) {
+            attributeConsumer.accept(queue.poll());
+        }
+    }
+
+    // Create a new JSON object without the specified attribute
+    private static JSONObject configMinusOne(JSONObject config, String excludedAttribute) {
+        JSONObject newConfig = new JSONObject();
+        for (Object entryObj : config.entrySet()) {
+            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
+            String attributeName = entry.getKey();
+            if (!attributeName.equals(excludedAttribute)) {
+                newConfig.put(attributeName, entry.getValue());
+            }
+        }
+        return newConfig;
+    }
+
+    // Build the connection string with the current configuration
+    private static String buildConnectionString(String server, int port, String databaseName, String user,
+            String password, Map<String, Object> values) {
+        StringBuilder urlBuilder = new StringBuilder(
+                String.format("jdbc:sqlserver://%s:%d;databaseName=%s;", server, port, databaseName));
+
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            String attributeName = entry.getKey();
+            Object attributeValue = entry.getValue();
+            urlBuilder.append(attributeName).append("=").append(attributeValue).append(";");
+        }
+
+        return urlBuilder.append("user=").append(user).append(";password=").append(password).toString();
+    }
+
+    private static void performDatabaseTest(String url) {
+        String sqlQuery = "SELECT * FROM employees";
+
+        try {
+            // Load the JDBC driver
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            // Establish the connection
+            try (Connection connection = DriverManager.getConnection(url)) {
+                // Create a PreparedStatement for the SQL query
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+                    // Execute the query and retrieve the result set
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        // Iterate through the result set and print the values
+                        System.out.println(url);
+                    }
+                }
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

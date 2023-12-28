@@ -1,0 +1,142 @@
+package jdbc_10_2_3;
+
+import java.io.FileReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+public class Main {
+
+    public static void main(String[] args) {
+        JSONParser parser = new JSONParser();
+        
+        try {
+        	JSONObject config = (JSONObject) parser.parse(new FileReader("C:\\Users\\t-mkosovac\\eclipse-workspace\\sqlTestConfig.json"));
+        	
+        	JSONArray endpoints = (JSONArray) config.get("endpoints");
+        	
+        	for (Object endpointObj : endpoints) {
+                JSONObject endpoint = (JSONObject) endpointObj;
+                String server = (String) endpoint.get("server");
+                int port = ((Long) endpoint.get("port")).intValue();
+                String databaseName = (String) endpoint.get("databaseName");
+                String user = (String) endpoint.get("user");
+                String password = (String) endpoint.get("password");
+
+                JSONObject endpointConfig = (JSONObject) endpoint.get("config");
+
+                iterateAttributes(endpointConfig, values -> {
+                    // Use the current combination of boolean values
+                    String url = buildConnectionString(server, port, databaseName, user, password, values);
+
+                    // Perform database connection test with the current configuration
+                    performDatabaseTest(url);
+                }, new HashMap<>());
+            }
+        	
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+    
+    private static void iterateAttributes(JSONObject config, Consumer<Map<String, Object>> attributeConsumer, Map<String, Object> currentValues) {
+        for (Object entryObj : config.entrySet()) {
+            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
+            String attributeName = entry.getKey();
+            JSONArray values = (JSONArray) entry.getValue();
+
+            // Iterate through all values for the current attribute
+            for (Object valueObj : values) {
+                currentValues.put(attributeName, valueObj);
+
+                // If there are more attributes, recursively iterate
+                if (config.size() > 1) {
+                    iterateAttributes(configMinusOne(config, attributeName), attributeConsumer, currentValues);
+                } else {
+                    // If this is the last attribute, execute the consumer
+                    attributeConsumer.accept(new HashMap<>(currentValues));
+                }
+            }
+        }
+    }
+    
+    private static JSONObject configMinusOne(JSONObject config, String excludedAttribute) {
+        // Create a new JSON object without the specified attribute
+        JSONObject newConfig = new JSONObject();
+        for (Object entryObj : config.entrySet()) {
+            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
+            String attributeName = entry.getKey();
+            if (!attributeName.equals(excludedAttribute)) {
+                newConfig.put(attributeName, entry.getValue());
+            }
+        }
+        return newConfig;
+    }
+
+    
+    private static String buildConnectionString(String server, int port, String databaseName, String user, String password, Map<String, Object> values) {
+        // Build the connection URL with the current configuration
+        StringBuilder urlBuilder = new StringBuilder(String.format("jdbc:sqlserver://%s:%d;databaseName=%s;", server, port, databaseName));
+
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            String attributeName = entry.getKey();
+            Object attributeValue = entry.getValue();
+            urlBuilder.append(attributeName).append("=").append(attributeValue).append(";");
+        }
+
+        return urlBuilder.append("user=").append(user).append(";password=").append(password).toString();
+    }
+    
+
+
+    private static void performDatabaseTest(String url) {
+    	String sqlQuery = "SELECT * FROM employees";
+
+        try {
+            // Load the JDBC driver
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            {
+            // Establish the connection
+            try (Connection connection = DriverManager.getConnection(url) {
+                // Create a PreparedStatement for the SQL query
+                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+                    // Execute the query and retrieve the result set
+                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                        // Iterate through the result set and print the values
+//                    	System.out.println("Connection Parameters: " +
+//                                "ReadOnly=" + readOnly +
+//                                ", UseEncryption=" + useEncryption +
+//                                ", TrustServerCertificate=" + trustServerCertificate +
+//                                ", MultipleActiveResultSets=" + multipleActiveResultSets +
+//                                ", TransparentNetworkIPResolution=" + transparentNetworkIPResolution +
+//                                ", AutoCommit=" + autoCommit +
+//                                ", IsolationLevel=" + isolationLevel +
+//                                ", UseUnicode=" + useUnicode);
+//                    	while (resultSet.next()) {
+//                            System.out.println("Employee ID: " + resultSet.getInt("employee_id") +
+//                                    ", Name: " + resultSet.getString("name") +
+//                                    ", Department: " + resultSet.getInt("age") +
+//                                    ", Salaey: " + resultSet.getInt("salary"));
+                        }
+                    }
+                }
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+    }
+}

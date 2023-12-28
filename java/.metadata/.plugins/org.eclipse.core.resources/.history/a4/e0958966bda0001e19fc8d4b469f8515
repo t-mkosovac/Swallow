@@ -1,0 +1,89 @@
+package jdbc_runner;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+public class Runner {
+    public static void main(String[] args) {
+        try {
+        	JSONParser parser = new JSONParser();
+
+        	JSONObject config = (JSONObject) parser.parse(new FileReader("C:\\Users\\t-mkosovac\\eclipse-workspace\\sqlTestConfig.json"));
+
+        	JSONArray driverVersions = (JSONArray) config.get("driverVersions");
+
+        	for (Object version : driverVersions) {
+        				
+        		String workspace = "", driverFolder = "", classpath = "";
+        		switch ((String)version) {
+				case "10.2.3":
+					workspace += "jdbc_10_2_3";
+					driverFolder += "sqljdbc_10.2.3.0_enu\\sqljdbc_10.2enu\\mssql-jdbc-10.2.3.jre8.jar";
+                    classpath += "jdbc_10_2_3.JDBC_10_2_3";
+					break;
+					
+				case "11.2.3":
+					workspace += "jdbc_11_2_3";
+					driverFolder += "sqljdbc_11.2.3.0_enu\\sqljdbc_11.2enu\\mssql-jdbc-11.2.3.jre18.jar";
+                    classpath += "jdbc_11_2_3.JDBC_11_2_3";
+					break;
+				
+				case "12.4.2":
+					workspace += "jdbc_12.4.2";
+					driverFolder += "sqljdbc_12.4.2.0_enu\\sqljdbc_12.4\\enu\\jars\\mssql-jdbc-12.4.2.jre11.jar";
+                    classpath += "jdbc_12_4_2.JDBC_12_4_2";
+					break;
+
+				default:
+					throw new Exception("Driver version " + version + "not supported");
+				}
+        		ProcessBuilder processBuilder = new ProcessBuilder(
+            		    "java",
+            		    "-cp", "C:\\Users\\t-mkosovac\\eclipse-workspace\\" + workspace + "\\bin;"
+            		    		+ "C:\\Users\\t-mkosovac\\Downloads\\json-simple-1.1.jar;"
+            		    		+ "C:\\Users\\t-mkosovac\\Downloads\\" + driverFolder,
+            		    classpath
+            		);
+
+                // Start the process
+                Process process = processBuilder.start();
+
+                InputStream inputStream = process.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                     System.out.println(line);
+                 }
+
+                // Uncomment the following lines if you want to read the error
+                // InputStream errorStream = process.getErrorStream();
+                // BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+                // String error;
+                // while ((error = errorReader.readLine()) != null) {
+                //     System.err.println(error);
+                // }
+
+                // Wait for the process to finish
+                int exitCode = process.waitFor();
+
+                // Print the exit code
+                System.out.println("Process exited with code: " + exitCode);
+
+        	}
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
