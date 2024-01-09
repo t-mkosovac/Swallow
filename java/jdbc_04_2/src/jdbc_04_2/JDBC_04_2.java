@@ -18,7 +18,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class Main {
+public class JDBC_04_2 {
 
 	public static void main(String[] args) {
         JSONParser parser = new JSONParser();

@@ -7,16 +7,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Queue;
-import java.util.function.Consumer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class JDBC_12_4_2 {
 
@@ -37,15 +36,10 @@ public class JDBC_12_4_2 {
                 String user = (String) endpoint.get("username");
                 String password = (String) endpoint.get("password");
 
-                JSONObject endpointConfig = (JSONObject) endpoint.get("options");
+                JSONObject endpointOptions = (JSONObject) endpoint.get("options");
 
-                // Iterate through each combination of boolean values
-                iterateAttributes(endpointConfig, values -> {
-                    // Use the current combination of boolean values
-                    String url = buildConnectionString(server, port, databaseName, user, password, values);
-                    // Perform database connection test with the current configuration
-                    performDatabaseTest(url);
-                });
+                itterateAttributes(server, port, databaseName, user, password, endpointOptions, args[1]);
+
             }
 
         } catch (Exception e) {
@@ -53,50 +47,75 @@ public class JDBC_12_4_2 {
         }
     }
 
-    private static void iterateAttributes(JSONObject config, Consumer<Map<String, Object>> attributeConsumer) {
-        Queue<Map<String, Object>> queue = new LinkedList<>();
-        queue.add(new HashMap<>()); // Start with an empty configuration
-
-        // Iterate through each attribute in the configuration
-        for (Object entryObj : config.entrySet()) {
-            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
+    public static void itterateAttributes(String server, int port, String database, String user, String password,
+            JSONObject endpointOptions, String driverVersion) {
+        List<Boolean> useEncryption = new ArrayList<Boolean>() {
+            {
+                add(false);
+            }
+        };
+        List<Boolean> trustServerCertificate = new ArrayList<Boolean>() {
+            {
+                add(false);
+            }
+        };
+        List<Boolean> readOnly = new ArrayList<Boolean>() {
+            {
+                add(false);
+            }
+        };
+        for (Object entrySet : endpointOptions.entrySet()) {
+            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entrySet;
             String attributeName = entry.getKey();
-            JSONArray values = (JSONArray) entry.getValue();
+            Object attributeValue = entry.getValue();
 
-            // Create a list to hold the configurations at this level
-            List<Map<String, Object>> currentLevelConfigurations = new ArrayList<>(queue);
+            if (attributeName.equals("useEncryption")) {
+                useEncryption = (List<Boolean>) attributeValue;
+            } else if (attributeName.equals("trustServerCertificate")) {
+                trustServerCertificate = (List<Boolean>) attributeValue;
+            } else if (attributeName.equals("readOnly")) {
+                readOnly = (List<Boolean>) attributeValue;
+            }
+        }
 
-            // Clear the queue for the next level of configurations
-            queue.clear();
+        for (Boolean useEncryptionValue : useEncryption) {
+            for (Boolean trustServerCertificateValue : trustServerCertificate) {
+                for (Boolean readOnlyValue : readOnly) {
+                    Map<String, Object> values = new HashMap<String, Object>();
+                    values.put("useEncryption", useEncryptionValue.toString());
+                    values.put("trustServerCertificate", trustServerCertificateValue.toString());
+                    values.put("readOnly", readOnlyValue.toString());
+                    String url = buildConnectionString(server, port, database, user, password, values);
+                    try {
+                        performDatabaseTest(url, driverVersion, server, Integer.toString(port), database);
+                    } catch (SQLException e) {
+                        if (e.getErrorCode() == 18456 && e.getSQLState().equals("S0001")) {
+                            System.out.println("[" + printCurrentTime()
+                                    + "] JDBC " + driverVersion + " login error: Wrong credentials for server: '"
+                                    + server + ":" + port
+                                    + "'.");
+                        } else if (e.getErrorCode() == 0 && e.getSQLState().equals("08S01")) {
+                            System.out.println("[" + printCurrentTime() + "] JDBC " + driverVersion
+                                    + " server error: Server '" + server
+                                    + ":" + port + "' is not reachable.");
+                        } else if (e.getErrorCode() == 4060 && e.getSQLState().equals("S0001")) {
+                            System.out.println(
+                                    "[" + printCurrentTime() + "] JDBC " + driverVersion + " login error: Database '"
+                                            + database + "' does not exist on server " + server + ":" + port + ".");
+                        } else {
+                            System.out.println(
+                                    "[" + printCurrentTime() + "] JDBC " + driverVersion + " unrecognized error: "
+                                            + e.getMessage());
+                        }
 
-            // Iterate through each existing configuration and add new configurations with
-            // the current attribute
-            for (Map<String, Object> currentConfig : currentLevelConfigurations) {
-                for (Object valueObj : values) {
-                    Map<String, Object> newConfig = new HashMap<>(currentConfig);
-                    newConfig.put(attributeName, valueObj);
-                    queue.add(newConfig);
+                        return;
+                    }
                 }
             }
         }
 
-        // Execute the consumer for each final configuration
-        while (!queue.isEmpty()) {
-            attributeConsumer.accept(queue.poll());
-        }
-    }
-
-    // Create a new JSON object without the specified attribute
-    private static JSONObject configMinusOne(JSONObject config, String excludedAttribute) {
-        JSONObject newConfig = new JSONObject();
-        for (Object entryObj : config.entrySet()) {
-            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
-            String attributeName = entry.getKey();
-            if (!attributeName.equals(excludedAttribute)) {
-                newConfig.put(attributeName, entry.getValue());
-            }
-        }
-        return newConfig;
+        System.out.println("[" + printCurrentTime() + "] All tests passed for endpoint '" + server + ":" + port
+                + "' with driver 'JDBC " + driverVersion + "'");
     }
 
     // Build the connection string with the current configuration
@@ -114,7 +133,8 @@ public class JDBC_12_4_2 {
         return urlBuilder.append("user=").append(user).append(";password=").append(password).toString();
     }
 
-    private static void performDatabaseTest(String url) {
+    private static void performDatabaseTest(String url, String driverVersion, String server, String port,
+            String database) throws SQLException {
         String sqlQuery = "SELECT * FROM employees";
 
         try {
@@ -127,14 +147,25 @@ public class JDBC_12_4_2 {
                     // Execute the query and retrieve the result set
                     try (ResultSet resultSet = preparedStatement.executeQuery()) {
                         // Iterate through the result set and print the values
-                        System.out.println(url);
                     }
                 }
             }
         } catch (SQLException se) {
-            se.printStackTrace();
+            throw se;
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String printCurrentTime() {
+        LocalDateTime now = LocalDateTime.now();
+
+        String pattern = "yyyy-MM-dd HH:mm:ss";
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+
+        String formattedDateTime = now.format(formatter);
+
+        return formattedDateTime;
     }
 }

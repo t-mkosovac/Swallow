@@ -25,8 +25,50 @@ def run_script(script_path: str, *args) -> None:
     subprocess.run([batch_script_path] + list(args), shell=True)
 
 def validate_json(config_file: str) -> None:
-    # TODO: Implement
-    pass
+    with open(config_file) as f:
+        data = json.load(f)
+
+    if 'drivers' not in data:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'drivers' key is missing.")
+        exit(1)
+    if not isinstance(data['drivers'], list):
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'drivers' key is not a list.")
+        exit(1)
+    if len(data['drivers']) == 0:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'drivers' list is empty.")
+        exit(1)
+    if 'endpoints' not in data:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'endpoints' key is missing.")
+        exit(1)
+    if not isinstance(data['endpoints'], list):
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'endpoints' key is not a list.")
+        exit(1)
+    if len(data['endpoints']) == 0:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'endpoints' list is empty.")
+        exit(1)
+
+    for endpoint in data['endpoints']:
+        if 'server' not in endpoint:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'server' key is missing in endpoint.")
+            exit(1)
+        if 'port' not in endpoint:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'port' key is missing in endpoint.")
+            exit(1)
+        if 'database' not in endpoint:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'database' key is missing in endpoint.")
+            exit(1)
+        if 'username' not in endpoint:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'username' key is missing in endpoint.")
+            exit(1)
+        if 'password' not in endpoint:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'password' key is missing in endpoint.")
+            exit(1)
+        if 'options' not in endpoint:
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'options' key is missing in endpoint.")
+            exit(1)
+        if not isinstance(endpoint['options'], dict):
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file is not in correct format, 'options' key is not a dictionary.")
+            exit(1)
 
 def read_retry_period(config_file: str) -> int:
     with open(config_file) as f:
@@ -35,7 +77,6 @@ def read_retry_period(config_file: str) -> int:
     return data.get('retryPeriod', 0)
 
 def run_tests(config_file: str) -> None:
-    print('-------------------------------------------------------------------------------------------')
     with open(config_file) as f:
         data = json.load(f)
 
@@ -51,6 +92,7 @@ def run_tests(config_file: str) -> None:
             run_script(scripts['java'], config_file, re.sub(r'jdbc_', '', driver))
         else:
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Driver '{driver}' is not supported. Please check sql_drivers.py for a list of supported drivers.")
+    print('-------------------------------------------------------------------------------------------')
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -74,10 +116,12 @@ if __name__ == "__main__":
     if retry_period > 0:
         # Setup schedule to run tests every retry_period minutes
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Running tests with retry period of " + str(retry_period) + " minute" + ("s" if retry_period > 1 else "") + "")
+        print('-------------------------------------------------------------------------------------------')
         schedule.every(retry_period).minutes.do(run_tests, config_file)
         while True:
             schedule.run_pending()
             time.sleep(1)
     else:
         # If retry period is does not exist, run tests once
+        print('-------------------------------------------------------------------------------------------')
         run_tests(config_file)

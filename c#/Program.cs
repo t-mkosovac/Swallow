@@ -68,7 +68,7 @@ class Program
                 DateTime currentTime = DateTime.Now;
                 string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
 
-                Console.WriteLine($"{formattedDateTime} All tests passed for endpoint '{server}:{port}' with driver C#-{driverVersion}.");
+                Console.WriteLine($"{formattedDateTime} All tests passed for endpoint '{server}:{port}' with driver 'C# {driverVersion}'");
             }
             catch (SqlException)
             {

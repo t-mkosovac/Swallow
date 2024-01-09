@@ -10,7 +10,6 @@ public class Runner {
 			// Depending on the driver version, set the workspace, driver folder and
 			// classpath
 			String version = args[1]; // driver version
-			System.out.println("VERSION: " + version);
 			String workspace = "", driverFolder = "", classpath = "";
 			switch ((String) version) {
 				case "10.2.3":
@@ -41,7 +40,9 @@ public class Runner {
 					"-cp", "H:\\sql-driver-apps\\java\\" + workspace + "\\bin;"
 							+ "C:\\Users\\t-mkosovac\\Downloads\\json-simple-1.1.jar;"
 							+ "C:\\Users\\t-mkosovac\\Downloads\\" + driverFolder,
-					classpath, args[0]);
+					classpath, args[0], version);
+
+			processBuilder.redirectErrorStream(true);
 
 			// Start the process
 			Process process = processBuilder.start();

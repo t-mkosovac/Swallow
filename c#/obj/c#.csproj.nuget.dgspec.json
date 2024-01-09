@@ -42,7 +42,7 @@
           "dependencies": {
             "Microsoft.Data.SqlClient": {
               "target": "Package",
-              "version": "[5.1.2, )"
+              "version": "[5.2.0-preview2.23159.1, )"
             },
             "Newtonsoft.Json": {
               "target": "Package",
