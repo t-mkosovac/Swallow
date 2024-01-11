@@ -38,12 +38,12 @@ H:\sql-driver-apps\c#\bin\Debug\net8.0\System.Drawing.Common.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\System.Memory.Data.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\System.Windows.Extensions.dll
-H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\unix\lib\net7.0\Microsoft.Data.SqlClient.dll
-H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win\lib\net7.0\Microsoft.Data.SqlClient.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
+H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\unix\lib\net7.0\Microsoft.Data.SqlClient.dll
+H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win\lib\net7.0\Microsoft.Data.SqlClient.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
 H:\sql-driver-apps\c#\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll

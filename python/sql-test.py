@@ -17,10 +17,7 @@ def pyodbc_test(server: str, port: str, database: str, username: str, password: 
         )
 
         with pyodbc.connect(conn_str) as conn:
-            with conn.cursor() as cursor:
-                # Execute a simple query to test the connection
-                cursor.execute("SELECT * FROM employees")
-                rows = cursor.fetchall()
+            pass
 
     # Catch specific exceptions to provide more helpful error messages
     except pyodbc.OperationalError as e:
@@ -37,10 +34,8 @@ def pymssql_test(server: str, port: str, database: str, username: str, password:
     try:
         # Conneccting to SQL Server using pymssql that does not support encryption, trust server certificate, and read only attributes
         with pymssql.connect(server, username, password, database, port) as conn:
-            with conn.cursor() as cursor:
-                # Execute a simple query to test the connection
-                cursor.execute("SELECT * FROM employees")
-                rows = cursor.fetchall()
+            pass
+        
     # Catch specific exceptions to provide more helpful error messages
     except pymssql.DatabaseError as e:
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] PYMSSQL database error: Wrong credentials for server '{server}:{port}' or database '{database}' does not exist.")

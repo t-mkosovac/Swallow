@@ -135,20 +135,13 @@ public class JDBC_12_4_2 {
 
     private static void performDatabaseTest(String url, String driverVersion, String server, String port,
             String database) throws SQLException {
-        String sqlQuery = "SELECT * FROM employees";
 
         try {
             // Load the JDBC driver
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
             // Establish the connection
             try (Connection connection = DriverManager.getConnection(url)) {
-                // Create a PreparedStatement for the SQL query
-                try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
-                    // Execute the query and retrieve the result set
-                    try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                        // Iterate through the result set and print the values
-                    }
-                }
+
             }
         } catch (SQLException se) {
             throw se;

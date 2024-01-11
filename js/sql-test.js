@@ -16,9 +16,7 @@ function getFormattedDate() {
 
 async function testMssqlConnection(config) {
   try {
-    const pool = await sql.connect(config);
-    // Query (you can customize the query as needed)
-    await pool.request().query('SELECT * FROM employees');
+    await sql.connect(config);
   } catch (err) {
     // Handle errors
     if (err.code === 'ETIMEOUT') {
@@ -43,9 +41,7 @@ async function testOdbcConnection(config, driver) {
     const connect = {
       connectionString: config_string,
     }
-    connection = await odbc.connect(connect);
-    // Query (you can customize the query as needed)
-    await connection.query('SELECT * FROM employees');
+    await odbc.connect(connect);
   } catch (err) {
     // Handle errors
     if (err.odbcErrors.some(item => item.state == 'HYT00')) {

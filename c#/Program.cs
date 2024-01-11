@@ -102,20 +102,11 @@ class Program
 
     static void TestConnection(StringBuilder connectionStringBuilder, String driverVersion, String server, String port, String database)
     {
-        string sqlQuery = "SELECT * FROM company.dbo.employees";
-
         using (SqlConnection connection = new SqlConnection(connectionStringBuilder.ToString()))
         {
             try
             {
                 connection.Open();
-
-                using (SqlCommand command = new SqlCommand(sqlQuery, connection))
-                {
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                    }
-                }
             }
             catch (SqlException ex)
             {
