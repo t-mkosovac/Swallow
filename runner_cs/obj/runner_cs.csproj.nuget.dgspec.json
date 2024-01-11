@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "H:\\sql-driver-apps\\c#\\c#.csproj": {}
+    "H:\\sql-driver-apps\\runner_cs\\runner_cs.csproj": {}
   },
   "projects": {
-    "H:\\sql-driver-apps\\c#\\c#.csproj": {
+    "H:\\sql-driver-apps\\runner_cs\\runner_cs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "H:\\sql-driver-apps\\c#\\c#.csproj",
-        "projectName": "c#",
-        "projectPath": "H:\\sql-driver-apps\\c#\\c#.csproj",
+        "projectUniqueName": "H:\\sql-driver-apps\\runner_cs\\runner_cs.csproj",
+        "projectName": "runner_cs",
+        "projectPath": "H:\\sql-driver-apps\\runner_cs\\runner_cs.csproj",
         "packagesPath": "C:\\Users\\t-mkosovac\\.nuget\\packages\\",
-        "outputPath": "H:\\sql-driver-apps\\c#\\obj\\",
+        "outputPath": "H:\\sql-driver-apps\\runner_cs\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\t-mkosovac\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -39,16 +39,6 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "dependencies": {
-            "Microsoft.Data.SqlClient": {
-              "target": "Package",
-              "version": "[5.0.0, )"
-            },
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.3, )"
-            }
-          },
           "imports": [
             "net461",
             "net462",
