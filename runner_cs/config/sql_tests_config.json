@@ -4,7 +4,7 @@
     {
       "server": "4.245.92.227",
       "port": 1433,
-      "database": "company",
+      "database": "master",
       "username": "sa",
       "password": "Password123",
       "options": {

@@ -2,7 +2,7 @@
   "drivers": ["jdbc_12.4.2", "jdbc_11.2.3", "js_mssql", "js_odbc_17", "py_odbc_18", "py_mssql", "cs_5.2.0-preview2.23159.1"],
   "endpoints": [
     {
-      "server": "4.245.92.22",
+      "server": "4.245.92.227",
       "port": 1433,
       "database": "company",
       "username": "sa",
