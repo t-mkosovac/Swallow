@@ -49,14 +49,14 @@ def pymssql_test(server: str, port: str, database: str, username: str, password:
 
 if __name__ == '__main__':
     # Open config file
-    with open(sys.argv[1]) as config_file:
+    with open("../config.json") as config_file:
         try:
             config = json.load(config_file)
         except json.JSONDecodeError as e:
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Error loading JSON config: {e}")
             sys.exit(1)
 
-    driver = sys.argv[2]
+    driver = 'py_odbc_18'
 
     # Iterate through endpoints in config file
     for endpoint in config.get('endpoints', []):

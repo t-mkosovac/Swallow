@@ -131,5 +131,5 @@ async function runTests(config, driver) {
   }
 }
 
-runTests(process.argv[2], process.argv[3]);
+runTests("../config.json", "js_mssql");
 

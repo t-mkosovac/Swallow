@@ -1,0 +1,18 @@
+{
+  "drivers": ["cs_5.2.0-preview2.23159.1", "py_mssql", "js_mssql"],
+  "retryPeriod": 1,
+  "endpoints": [
+    {
+      "server": "4.245.92.227",
+      "port": 1433,
+      "database": "master",
+      "username": "sa",
+      "password": "Password123",
+      "options": {
+        "useEncryption": [false],
+        "trustServerCertificate": [true],
+        "readOnly": [true, false]
+      }
+    }
+  ]
+}
