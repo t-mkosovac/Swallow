@@ -25,5 +25,7 @@ COPY sql-test.py /py/sql-test.py
 # Set the working directory
 WORKDIR /py
 
+ENV DRIVER=$(DRIVER)
+
 # Run your Python code
 CMD ["python", "sql-test.py"]

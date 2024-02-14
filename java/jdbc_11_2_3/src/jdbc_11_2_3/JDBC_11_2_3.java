@@ -3,8 +3,6 @@ package jdbc_11_2_3;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.ArrayList;
@@ -23,7 +21,7 @@ public class JDBC_11_2_3 {
         JSONParser parser = new JSONParser();
 
         try {
-            JSONObject config = (JSONObject) parser.parse(new FileReader(args[0])); // path to the config file
+            JSONObject config = (JSONObject) parser.parse(new FileReader("../config.json")); // path to the config file
 
             JSONArray endpoints = (JSONArray) config.get("endpoints");
 
@@ -38,7 +36,7 @@ public class JDBC_11_2_3 {
 
                 JSONObject endpointOptions = (JSONObject) endpoint.get("options");
 
-                itterateAttributes(server, port, databaseName, user, password, endpointOptions, args[1]);
+                itterateAttributes(server, port, databaseName, user, password, endpointOptions, "11.2.3");
 
             }
 

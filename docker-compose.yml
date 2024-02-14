@@ -26,3 +26,30 @@ services:
       - "8002:80"
     volumes:
       - ./sql_tests_config.json:/config.json
+
+  java12:
+    build:
+      context: ./java/jdbc_12_4_2
+      dockerfile: Dockerfile
+    ports:
+      - "8003:80"
+    volumes:
+      - ./sql_tests_config.json:/config.json
+
+  java11:
+    build:
+      context: ./java/jdbc_11_2_3
+      dockerfile: Dockerfile
+    ports:
+      - "8004:80"
+    volumes:
+      - ./sql_tests_config.json:/config.json
+
+  java10:
+    build:
+      context: ./java/jdbc_10_2_3
+      dockerfile: Dockerfile
+    ports:
+      - "8005:80"
+    volumes:
+      - ./sql_tests_config.json:/config.json

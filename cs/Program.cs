@@ -2,6 +2,8 @@
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Xml.Linq;
+using System.Reflection;
+
 
 #nullable disable
 class Program
@@ -18,8 +20,7 @@ class Program
         JObject jsonConfig = JObject.Parse(File.ReadAllText(jsonConfigPath));
 
         // Update the .csproj file with the driver version
-        string driverVersion = "4.0.0";
-        // UpdateCsProjFile(driverVersion);
+        string driverVersion = Assembly.GetAssembly(typeof(SqlConnection)).GetName().Version.ToString();
 
         // Iterate over endpoints
         JArray endpoints = (JArray)jsonConfig["endpoints"];

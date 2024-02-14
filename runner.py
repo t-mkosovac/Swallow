@@ -1,8 +1,10 @@
 import subprocess
 import os
 import json
+import re
 import schedule
 import time
+import xml.etree.ElementTree as ET
 from sql_drivers import cs_drivers, py_drivers, js_drivers, java_drivers
 
 def get_absolute_path(relative_path: str) -> str:
@@ -67,32 +69,33 @@ def read_retry_period(config_file: str) -> int:
 
     return data.get('retryPeriod', 0)
 
+def update_cs_driver_version(xml_path: str, new_version: str) -> None:
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    package_ref = root.find("./ItemGroup/PackageReference[@Include='Microsoft.Data.SqlClient']")
+
+    if package_ref is not None:
+        package_ref.set('Version', new_version)
+        tree.write(xml_path)
+
 def run_tests(config_file: str) -> None:
     with open(config_file) as f:
         data = json.load(f)
 
     # Iterate through list of drivers in config file
-    driver_list = []
     for driver in data['drivers']:
         if driver in cs_drivers:
-            #run_script(scripts['cs'], config_file, re.sub(r'cs_', '', driver))
-            driver_list.append('cs')
-            pass
+            update_cs_driver_version(get_absolute_path('cs\\cs.csproj'), re.sub(r'cs_', '', driver))
+            subprocess.run(['docker-compose', 'build', 'cs'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(['docker-compose', 'up', 'cs'])
         elif driver in py_drivers:
-            driver_list.append('py')
-            # run_script(scripts['py'], config_file, driver)
-            pass
+            subprocess.run(['docker-compose', 'run','-e', 'DRIVER=' + driver, 'py'])
         elif driver in js_drivers:
-            driver_list.append('js')
-            # run_script(scripts['js'], config_file, driver)
-            pass
+            subprocess.run(['docker-compose', 'up', 'js'])
         elif driver in java_drivers:
-            driver_list.append('java')
-            # run_script(scripts['java'], config_file, re.sub(r'jdbc_', '', driver))
-            pass
+            subprocess.run(['docker-compose', 'up', 'java' + int(re.search(r'\d+', driver).group()).__str__()])
         else:
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Driver '{driver}' is not supported. Please check sql_drivers.py for a list of supported drivers.")
-    subprocess.run(['docker-compose', 'up'] + driver_list)
     print('-------------------------------------------------------------------------------------------')
 
 if __name__ == "__main__":
@@ -116,6 +119,7 @@ if __name__ == "__main__":
         # Setup schedule to run tests every retry_period minutes
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Running tests with retry period of " + str(retry_period) + " minute" + ("s" if retry_period > 1 else "") + "")
         print('-------------------------------------------------------------------------------------------')
+        run_tests(config_file)
         schedule.every(retry_period).minutes.do(run_tests, config_file)
         while True:
             schedule.run_pending()

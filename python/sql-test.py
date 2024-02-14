@@ -1,4 +1,5 @@
 import pyodbc
+import os
 import pymssql
 import json
 import re
@@ -56,7 +57,7 @@ if __name__ == '__main__':
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Error loading JSON config: {e}")
             sys.exit(1)
 
-    driver = 'py_odbc_18'
+    driver = os.environ.get('DRIVER')
 
     # Iterate through endpoints in config file
     for endpoint in config.get('endpoints', []):
