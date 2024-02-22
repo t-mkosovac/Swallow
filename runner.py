@@ -5,17 +5,13 @@ import re
 import schedule
 import time
 import xml.etree.ElementTree as ET
-from sql_drivers import cs_drivers, py_drivers, js_drivers, java_drivers
+from dotenv import dotenv_values
+from available_drivers import cs_drivers, py_drivers, js_drivers, java_drivers
 
 def get_absolute_path(relative_path: str) -> str:
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
     return os.path.join(current_dir, relative_path)
-
-def run_script(script_path: str, *args) -> None:
-    batch_script_path = get_absolute_path(script_path)
-
-    subprocess.run([batch_script_path] + list(args), shell=True)
 
 def validate_json(config_file: str) -> None:
     with open(config_file) as f:
@@ -82,49 +78,52 @@ def run_tests(config_file: str) -> None:
     with open(config_file) as f:
         data = json.load(f)
 
+    docker_config_file_path = dotenv_values('.env').get('DOCKER_CONFIG_FILE_PATH')
+
     # Iterate through list of drivers in config file
     for driver in data['drivers']:
         if driver in cs_drivers:
-            update_cs_driver_version(get_absolute_path('cs\\cs.csproj'), re.sub(r'cs_', '', driver))
+            cs_driver = re.sub(r'cs_', '', driver)
+            update_cs_driver_version(get_absolute_path('cs/cs.csproj'), cs_driver)
             subprocess.run(['docker-compose', 'build', 'cs'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            subprocess.run(['docker-compose', 'up', 'cs'])
+            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + cs_driver, '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, 'cs'])
         elif driver in py_drivers:
-            subprocess.run(['docker-compose', 'run','-e', 'DRIVER=' + driver, 'py'])
+            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + driver, '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, 'py'])
         elif driver in js_drivers:
-            subprocess.run(['docker-compose', 'up', 'js'])
+            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + driver, '-e','CONFIG_FILE_PATH=' + docker_config_file_path, 'js'])
         elif driver in java_drivers:
-            subprocess.run(['docker-compose', 'up', 'java' + int(re.search(r'\d+', driver).group()).__str__()])
+            subprocess.run(['docker-compose', 'run', '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, 'java' + int(re.search(r'\d+', driver).group()).__str__()])
         else:
-            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Driver '{driver}' is not supported. Please check sql_drivers.py for a list of supported drivers.")
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Driver '{driver}' is not supported. Please check available_drivers.py for a list of supported drivers.")
     print('-------------------------------------------------------------------------------------------')
 
 if __name__ == "__main__":
 
     # Get absolute path to config file
-    config_file = get_absolute_path('sql_tests_config.json')
-    print(config_file)
+    config_file = dotenv_values('.env').get('CONFIG_FILE_PATH')
+    config_file_path = get_absolute_path(config_file)
 
     # Check if config file exists
-    if not os.path.exists(config_file):
+    if not os.path.exists(config_file_path):
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Config file does not exist")
         exit(1)
 
     # check if config file is in correct format
-    validate_json(config_file)
+    validate_json(config_file_path)
 
     # Read retry period from config file (if exists)
-    retry_period = read_retry_period(config_file)
+    retry_period = read_retry_period(config_file_path)
 
     if retry_period > 0:
         # Setup schedule to run tests every retry_period minutes
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Running tests with retry period of " + str(retry_period) + " minute" + ("s" if retry_period > 1 else "") + "")
         print('-------------------------------------------------------------------------------------------')
-        run_tests(config_file)
-        schedule.every(retry_period).minutes.do(run_tests, config_file)
+        run_tests(config_file_path)
+        schedule.every(retry_period).minutes.do(run_tests, config_file_path)
         while True:
             schedule.run_pending()
             time.sleep(1)
     else:
         # If retry period is does not exist, run tests once
         print('-------------------------------------------------------------------------------------------')
-        run_tests(config_file)
+        run_tests(config_file_path)

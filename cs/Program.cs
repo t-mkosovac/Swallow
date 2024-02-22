@@ -1,8 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Text;
 using Newtonsoft.Json.Linq;
-using System.Xml.Linq;
-using System.Reflection;
 
 
 #nullable disable
@@ -16,11 +14,11 @@ class Program
     static void runTests()
     {
         // Path to the JSON config file
-        string jsonConfigPath = "../config.json";
+        string jsonConfigPath = Environment.GetEnvironmentVariable("CONFIG_FILE_PATH");
         JObject jsonConfig = JObject.Parse(File.ReadAllText(jsonConfigPath));
 
         // Update the .csproj file with the driver version
-        string driverVersion = Assembly.GetAssembly(typeof(SqlConnection)).GetName().Version.ToString();
+        string driverVersion = Environment.GetEnvironmentVariable("DRIVER");
 
         // Iterate over endpoints
         JArray endpoints = (JArray)jsonConfig["endpoints"];
@@ -69,35 +67,12 @@ class Program
                 DateTime currentTime = DateTime.Now;
                 string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
 
-                Console.WriteLine($"{formattedDateTime} All tests passed for endpoint '{server}:{port}' with driver 'C# {driverVersion}'");
+                Console.WriteLine($"{formattedDateTime} All tests passed for endpoint '{server}:{port}' with driver 'C# SqlClient {driverVersion}'");
             }
             catch (SqlException)
             {
                 break;
             }
-        }
-    }
-
-    static void UpdateCsProjFile(string sqlClientVersion)
-    {
-        string csprojFilePath = "cs.csproj";
-
-        // Load the .csproj file as XML
-        XDocument csprojDoc = XDocument.Load(csprojFilePath);
-
-        // Find the PackageReference element for Microsoft.Data.SqlClient
-        XElement packageReference = csprojDoc.Descendants("PackageReference")
-            .FirstOrDefault(e => e.Attribute("Include")?.Value == "Microsoft.Data.SqlClient");
-
-        // Update the version attribute
-        if (packageReference != null)
-        {
-            packageReference.SetAttributeValue("Version", sqlClientVersion);
-            csprojDoc.Save(csprojFilePath);
-        }
-        else
-        {
-            Console.WriteLine("PackageReference for Microsoft.Data.SqlClient not found in .csproj file.");
         }
     }
 

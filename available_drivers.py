@@ -13,11 +13,11 @@ cs_drivers = [
 ]
 
 py_drivers = [
-    'py_odbc_13', 'py_odbc_17', 'py_odbc_18', 'py_mssql'
+    'py_odbc_17', 'py_odbc_18', 'py_mssql'
 ]
 
 js_drivers = [
-    'js_odbc_13', 'js_odbc_17', 'js_odbc_18', 'js_mssql'
+    'js_mssql'
 ]
 
 java_drivers = [
