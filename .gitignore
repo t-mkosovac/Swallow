@@ -1,12 +1,6 @@
 # Ignore changes in __pycache__ folder
 __pycache__/
 
-# Ignore all .json files
-*.json
-
-# Ignore all .csproj files
-*.csproj
-
 # Ignore obj and bin folders in subfolders
 **/obj/
 **/bin/
@@ -14,13 +8,4 @@ __pycache__/
 # Ignore node_modules folders in subfolders
 **/node_modules/
 
-# Ignore .metadata folders in subfolders
-**/.metadata/
 
-# Ignore .settings folders in subfolders
-**/.settings/
-
-# Ignore files that start with a dot
-
-# Ignore .jar files
-*.jar
