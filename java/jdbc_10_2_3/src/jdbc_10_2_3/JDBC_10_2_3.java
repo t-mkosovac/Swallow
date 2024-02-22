@@ -21,7 +21,9 @@ public class JDBC_10_2_3 {
         JSONParser parser = new JSONParser();
 
         try {
-            JSONObject config = (JSONObject) parser.parse(new FileReader("../config.json")); // path to the config file
+            String config_file_path = System.getenv("CONFIG_FILE_PATH");
+
+            JSONObject config = (JSONObject) parser.parse(new FileReader(config_file_path)); // path to the config file
 
             JSONArray endpoints = (JSONArray) config.get("endpoints");
 

@@ -50,7 +50,8 @@ def pymssql_test(server: str, port: str, database: str, username: str, password:
 
 if __name__ == '__main__':
     # Open config file
-    with open("../config.json") as config_file:
+    config_file_path = os.environ.get('CONFIG_FILE_PATH')
+    with open(config_file_path) as config_file:
         try:
             config = json.load(config_file)
         except json.JSONDecodeError as e:

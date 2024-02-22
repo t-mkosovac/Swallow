@@ -1,55 +1,43 @@
-version: "3.8"
+version: ${DOCKER_COMPOSE_VERSION}
 services:
   cs:
     build:
-      context: ./cs
-      dockerfile: Dockerfile
-    ports:
-      - "8000:80"
+      context: ${CS_DIR}
+      dockerfile: ${DOCKERFILE}
     volumes:
-      - ./sql_tests_config.json:/config.json
+      - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   js:
     build:
-      context: ./js
-      dockerfile: Dockerfile
-    ports:
-      - "8001:80"
+      context: ${JS_DIR}
+      dockerfile: ${DOCKERFILE}
     volumes:
-      - ./sql_tests_config.json:/config.json
+      - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   py:
     build:
-      context: ./python
-      dockerfile: Dockerfile
-    ports:
-      - "8002:80"
+      context: ${PY_DIR}
+      dockerfile: ${DOCKERFILE}
     volumes:
-      - ./sql_tests_config.json:/config.json
+      - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   java12:
     build:
-      context: ./java/jdbc_12_4_2
-      dockerfile: Dockerfile
-    ports:
-      - "8003:80"
+      context: ${JAVA12_DIR}
+      dockerfile: ${DOCKERFILE}
     volumes:
-      - ./sql_tests_config.json:/config.json
+      - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   java11:
     build:
-      context: ./java/jdbc_11_2_3
-      dockerfile: Dockerfile
-    ports:
-      - "8004:80"
+      context: ${JAVA11_DIR}
+      dockerfile: ${DOCKERFILE}
     volumes:
-      - ./sql_tests_config.json:/config.json
+      - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   java10:
     build:
-      context: ./java/jdbc_10_2_3
-      dockerfile: Dockerfile
-    ports:
-      - "8005:80"
+      context: ${JAVA10_DIR}
+      dockerfile: ${DOCKERFILE}
     volumes:
-      - ./sql_tests_config.json:/config.json
+      - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}

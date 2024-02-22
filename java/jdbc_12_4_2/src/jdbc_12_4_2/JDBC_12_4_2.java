@@ -21,7 +21,9 @@ public class JDBC_12_4_2 {
         JSONParser parser = new JSONParser();
 
         try {
-            JSONObject config = (JSONObject) parser.parse(new FileReader("../config.json"));
+            String config_file_path = System.getenv("CONFIG_FILE_PATH");
+
+            JSONObject config = (JSONObject) parser.parse(new FileReader(config_file_path)); // path to the config file
 
             JSONArray endpoints = (JSONArray) config.get("endpoints");
 
@@ -49,17 +51,17 @@ public class JDBC_12_4_2 {
             JSONObject endpointOptions, String driverVersion) {
         List<Boolean> useEncryption = new ArrayList<Boolean>() {
             {
-                add(false);
+                add(true);
             }
         };
         List<Boolean> trustServerCertificate = new ArrayList<Boolean>() {
             {
-                add(false);
+                add(true);
             }
         };
         List<Boolean> readOnly = new ArrayList<Boolean>() {
             {
-                add(false);
+                add(true);
             }
         };
         for (Object entrySet : endpointOptions.entrySet()) {
