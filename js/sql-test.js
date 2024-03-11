@@ -19,9 +19,9 @@ async function testMssqlConnection(config) {
   } catch (err) {
     // Handle errors
     if (err.code === 'ETIMEOUT') {
-      console.error(`[${getFormattedDate()}] JSMSSQL timeout error: Server ${config.server}:${config.port} is not reachable`);
+      console.error(`[${getFormattedDate()}] JSMSSQL timeout error: Server '${config.server}:${config.port}' is not reachable.`);
     } else if (err.code === 'ELOGIN') {
-      console.error(`[${getFormattedDate()}] JSMSSQL login error: Wrong credentials for server ${config.server}:${config.port} or database ${config.database} does not exist`);
+      console.error(`[${getFormattedDate()}] JSMSSQL login error: Wrong credentials for server '${config.server}:${config.port}' or database '${config.database}' does not exist.`);
     } else {
       console.error(`[${getFormattedDate()}] JSMSSQL unrecognized error: ${err.message}`);
     }
@@ -69,7 +69,7 @@ async function iterateConfigurations(options, endpoint) {
       }
     }
   }
-  console.log(`[${getFormattedDate()}] All tests passed for endpoint '${endpoint.server}:${endpoint.port}' with driver 'JSMSSQL'`);
+  console.log(`[${getFormattedDate()}] All tests passed for endpoint '${endpoint.server}:${endpoint.port}' with driver 'JSMSSQL'.`);
 }
 
 async function runTests(config) {

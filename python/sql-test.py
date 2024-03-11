@@ -25,7 +25,10 @@ def pyodbc_test(server: str, port: str, database: str, username: str, password: 
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] PYODBC operational error: server '{server}:{port}' is not reachable.")
         raise e
     except pyodbc.InterfaceError as e:
-        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] PYODBC interface error: Wrong credentials for server '{server}:{port}' or database '{database}' does not exist.")
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] PYODBC interface error: Wrong credentials for server '{server}:{port}'.")
+        raise e
+    except pyodbc.DatabaseError as e:
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] PYODBC database error: Database '{database}' does not exist.")
         raise e
     except pyodbc.Error as e:
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] PYODBC unrecognized error: {e}")

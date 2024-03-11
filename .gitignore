@@ -3,7 +3,6 @@ __pycache__/
 
 # Ignore obj and bin folders in subfolders
 **/obj/
-**/bin/
 
 # Ignore node_modules folders in subfolders
 **/node_modules/

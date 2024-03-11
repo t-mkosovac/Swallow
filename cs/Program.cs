@@ -89,19 +89,19 @@ class Program
                 DateTime currentTime = DateTime.Now;
                 string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
 
-                if (ex.Number == 10060)
-                    Console.WriteLine($"{formattedDateTime} C# {driverVersion} server error: server '{server}:{port}' is not reachable.");
+                if (ex.Number == 0 && ex.ErrorCode == -2146232060)
+                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} server error: server '{server}:{port}' is not reachable.");
                 else if (ex.Number == 4060)
                 {
-                    Console.WriteLine($"{formattedDateTime} C# {driverVersion} database error: Database '{database}' does not exist on server '{server}:{port}'.");
+                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} database error: Database '{database}' does not exist on server '{server}:{port}'.");
                 }
                 else if (ex.Number == 18456)
                 {
-                    Console.WriteLine($"{formattedDateTime} C# {driverVersion} login error: Wrong credentials for server '{server}:{port}'.");
+                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} login error: Wrong credentials for server '{server}:{port}'.");
                 }
                 else
                 {
-                    Console.WriteLine($"{formattedDateTime} C# {driverVersion} unrecognized error: {ex.Message}");
+                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} unrecognized error: {ex.Message} for server '{server}:{port}' ex.Number: {ex.Number} ex.ErrorCode: {ex.ErrorCode} ex.State: {ex.State} ex.LineNumber: {ex.LineNumber} ex.Procedure: {ex.Procedure} ex.Server: {ex.Server} ex.Source: {ex.Source} ex.TargetSite: {ex.TargetSite} ex.InnerException: {ex.InnerException} ex.StackTrace: {ex.StackTrace} ex.HelpLink: {ex.HelpLink} ex.Data: {ex.Data} ex.HResult: {ex.HResult} ex.GetType: {ex.GetType()} ex.GetType().Name: {ex.GetType().Name} ex.GetType().FullName: {ex.GetType().FullName} ex.GetType().AssemblyQualifiedName: {ex.GetType().AssemblyQualifiedName} ex.GetType().BaseType: {ex.GetType().BaseType} ex.GetType().GUID: {ex.GetType().GUID} ex.GetType().IsCOMObject: {ex.GetType().IsCOMObject} ex.GetType().IsInterface: {ex.GetType().IsInterface} ex.GetType().IsArray: {ex.GetType().IsArray} ex.GetType().IsByRef: {ex.GetType().IsByRef} ex.GetType().IsPointer: {ex.GetType().IsPointer} ex.GetType().IsPrimitive: {ex.GetType().IsPrimitive} ex.GetType().IsValueType: {ex.GetType().IsValueType} ex.GetType().IsEnum: {ex.GetType().IsEnum} ex.GetType().IsGenericType: {ex.GetType().IsGenericType} ex.GetType().IsGenericTypeDefinition: {ex.GetType().IsGenericTypeDefinition} ex.GetType().IsConstructedGenericType: {ex.GetType().IsConstructedGenericType} ex.GetType().IsGenericParameter: {ex.GetType().IsGenericParameter} ex.GetType().IsSecurityCritical: {ex.GetType().IsSecurityCritical} ex.GetType().IsSecuritySafeCritical: {ex.GetType().IsSecuritySafeCritical} ex.GetType().IsSecurityTransparent: {ex.GetType().IsSecurityTransparent} ex.GetType().IsVisible: {ex.GetType().IsVisible} ex.GetType().IsNotPublic: {ex.GetType().IsNotPublic} ex.GetType().IsPublic: {ex.GetType().IsPublic} ex.GetType().IsNestedPublic: {ex.GetType().IsNestedPublic} ex.GetType().IsNestedPrivate: {ex.GetType().IsNestedPrivate} ex.GetType().IsNestedFamily: {ex.GetType().IsNestedFamily} ex.GetType().IsNestedAssembly: {ex.GetType().IsNestedAssembly} ex.GetType().IsNestedFamANDAssem: {ex.GetType().IsNestedFamANDAssem} ex.GetType().Is");
                 }
                 throw;
             }
