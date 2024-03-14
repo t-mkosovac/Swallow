@@ -74,7 +74,7 @@ def update_cs_driver_version(xml_path: str, new_version: str) -> None:
         package_ref.set('Version', new_version)
         tree.write(xml_path)
 
-def run_tests(config_file: str) -> None:
+def run_tests(config_file: str, log_file_name: str) -> None:
     with open(config_file) as f:
         data = json.load(f)
 
@@ -83,19 +83,24 @@ def run_tests(config_file: str) -> None:
     # Iterate through list of drivers in config file
     for driver in data['drivers']:
         if driver in cs_drivers:
-            cs_driver = re.sub(r'cs_', '', driver)
+            cs_driver = re.sub(r'SqlClient ', '', driver)
             update_cs_driver_version(get_absolute_path('cs/cs.csproj'), cs_driver)
             subprocess.run(['docker-compose', 'build', 'cs'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + cs_driver, '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, 'cs'])
+            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + cs_driver, '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, '-e', 'LOG_FILE_PATH=/' + log_file_name, 'cs'])
         elif driver in py_drivers:
-            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + driver, '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, 'py'])
+            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + driver, '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, '-e', 'LOG_FILE_PATH=/' + log_file_name, 'py'])
         elif driver in js_drivers:
-            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + driver, '-e','CONFIG_FILE_PATH=' + docker_config_file_path, 'js'])
+            subprocess.run(['docker-compose', 'run', '-e', 'DRIVER=' + driver, '-e','CONFIG_FILE_PATH=' + docker_config_file_path, '-e', 'LOG_FILE_PATH=/' + log_file_name, 'js'])
         elif driver in java_drivers:
-            subprocess.run(['docker-compose', 'run', '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, 'java' + int(re.search(r'\d+', driver).group()).__str__()])
+            subprocess.run(['docker-compose', 'run', '-e', 'CONFIG_FILE_PATH=' + docker_config_file_path, '-e', 'LOG_FILE_PATH=/' + log_file_name, 'java' + int(re.search(r'\d+', driver).group()).__str__()])
         else:
             print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Driver '{driver}' is not supported. Please check available_drivers.py for a list of supported drivers.")
-    print('-------------------------------------------------------------------------------------------')
+    print_both(200 * '-', log_file_name)
+
+# Print to console and log file
+def print_both(text: str, file_name: str) -> None:
+    print(text)
+    print(text, file=open(file_name, 'a'))
 
 if __name__ == "__main__":
 
@@ -114,16 +119,18 @@ if __name__ == "__main__":
     # Read retry period from config file (if exists)
     retry_period = read_retry_period(config_file_path)
 
+    log_file_name = 'logs/test_' + time.strftime('%Y%m%d_%H%M%S') + '.log'
+
     if retry_period > 0:
         # Setup schedule to run tests every retry_period minutes
         print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Running tests with retry period of " + str(retry_period) + " minute" + ("s" if retry_period > 1 else "") + "")
-        print('-------------------------------------------------------------------------------------------')
-        run_tests(config_file_path)
+        print_both('-------------------------------------------------------------------------------------------', log_file_name)
+        run_tests(config_file_path, log_file_name)
         schedule.every(retry_period).minutes.do(run_tests, config_file_path)
         while True:
             schedule.run_pending()
             time.sleep(1)
     else:
         # If retry period is does not exist, run tests once
-        print('-------------------------------------------------------------------------------------------')
-        run_tests(config_file_path)
+        print_both(200 * '-', log_file_name)
+        run_tests(config_file_path, log_file_name)

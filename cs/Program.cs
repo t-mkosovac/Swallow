@@ -8,6 +8,7 @@ class Program
 {
     static void Main(string[] args)
     {
+        //make a dummy file
         runTests();
     }
 
@@ -19,6 +20,7 @@ class Program
 
         // Update the .csproj file with the driver version
         string driverVersion = Environment.GetEnvironmentVariable("DRIVER");
+        string logFilePath = Environment.GetEnvironmentVariable("LOG_FILE_PATH");
 
         // Iterate over endpoints
         JArray endpoints = (JArray)jsonConfig["endpoints"];
@@ -42,47 +44,47 @@ class Program
 
             if (useEncryption == null) useEncryption = new JArray(false);
             if (readOnly == null) readOnly = new JArray(false);
-            if (trustServerCertificate == null) trustServerCertificate = new JArray(false);
+            if (trustServerCertificate == null) trustServerCertificate = new JArray(true);
 
-            try
+            int errorBits = 0;
+
+            foreach (JValue encryption in useEncryption.Values())
             {
-                foreach (JValue encryption in useEncryption.Values())
+                foreach (JValue trust in trustServerCertificate.Values())
                 {
-                    foreach (JValue trust in trustServerCertificate.Values())
+                    foreach (JValue read in readOnly.Values())
                     {
-                        foreach (JValue read in readOnly.Values())
-                        {
-                            StringBuilder connectionStringBuilderCopy = new StringBuilder(connectionStringBuilder.ToString());
-                            string applicationIntent = (bool)read.Value ? "ReadOnly" : "ReadWrite";
-                            connectionStringBuilderCopy.Append($"ApplicationIntent={applicationIntent};");
-                            connectionStringBuilderCopy.Append($"Encrypt={encryption.Value};");
-                            connectionStringBuilderCopy.Append($"TrustServerCertificate={trust.Value};");
 
-                            // Test the connection with the connection string
-                            TestConnection(connectionStringBuilderCopy, driverVersion, server, port.ToString(), databaseName);
-                        }
+                        StringBuilder connectionStringBuilderCopy = new StringBuilder(connectionStringBuilder.ToString());
+                        string applicationIntent = (bool)read.Value ? "ReadOnly" : "ReadWrite";
+                        connectionStringBuilderCopy.Append($"ApplicationIntent={applicationIntent};");
+                        connectionStringBuilderCopy.Append($"Encrypt={encryption.Value};");
+                        connectionStringBuilderCopy.Append($"TrustServerCertificate={trust.Value};");
+
+                        // Test the connection with the connection string
+                        int error = TestConnection(connectionStringBuilderCopy, driverVersion, server, port.ToString(), databaseName, read.Value.ToString(), encryption.Value.ToString(), trust.Value.ToString(), logFilePath);
+                        errorBits |= error;
                     }
                 }
-
-                DateTime currentTime = DateTime.Now;
-                string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
-
-                Console.WriteLine($"{formattedDateTime} All tests passed for endpoint '{server}:{port}' with driver 'C# SqlClient {driverVersion}'");
             }
-            catch (SqlException)
-            {
-                break;
-            }
+
+            printResult(errorBits, driverVersion, server, port);
         }
     }
 
-    static void TestConnection(StringBuilder connectionStringBuilder, String driverVersion, String server, String port, String database)
+    static int TestConnection(StringBuilder connectionStringBuilder, String driverVersion, String server, String port, String database, String applicationIntent, String encryption, String trustServerCertificate, String logFilePath)
     {
         using (SqlConnection connection = new SqlConnection(connectionStringBuilder.ToString()))
         {
             try
             {
                 connection.Open();
+
+                DateTime currentTime = DateTime.Now;
+                string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
+
+                File.AppendAllText(logFilePath, $"{formattedDateTime} Test passed for endpoint '{server}:{port}' with driver 'C# SqlClient {driverVersion}' with options: encryption={encryption}, trust_server_certificate={trustServerCertificate}, read_only={applicationIntent}.\n");
+                return 0;
             }
             catch (SqlException ex)
             {
@@ -90,21 +92,60 @@ class Program
                 string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
 
                 if (ex.Number == 0 && ex.ErrorCode == -2146232060)
-                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} server error: server '{server}:{port}' is not reachable.");
+                {
+                    Console.WriteLine(logFilePath);
+                    File.AppendAllText(logFilePath, $"{formattedDateTime} C# SqlClient {driverVersion} server error: server '{server}:{port}' is not reachable with options: encryption={encryption}, trust_server_certificate={trustServerCertificate}, read_only={applicationIntent}.\n");
+                    return 1;
+
+                }
                 else if (ex.Number == 4060)
                 {
-                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} database error: Database '{database}' does not exist on server '{server}:{port}'.");
+                    File.AppendAllText(logFilePath, $"{formattedDateTime} C# SqlClient {driverVersion} database error: Database '{database}' does not exist on server '{server}:{port}' with options: encryption={encryption}, trust_server_certificate={trustServerCertificate}, read_only={applicationIntent}.\n");
+                    return 2;
                 }
                 else if (ex.Number == 18456)
                 {
-                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} login error: Wrong credentials for server '{server}:{port}'.");
+                    File.AppendAllText(logFilePath, $"{formattedDateTime} C# SqlClient {driverVersion} login error: Wrong credentials for server '{server}:{port}' with options: encryption={encryption}, trust_server_certificate={trustServerCertificate}, read_only={applicationIntent}.\n");
+                    return 4;
                 }
                 else
                 {
-                    Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} unrecognized error: {ex.Message} for server '{server}:{port}' ex.Number: {ex.Number} ex.ErrorCode: {ex.ErrorCode} ex.State: {ex.State} ex.LineNumber: {ex.LineNumber} ex.Procedure: {ex.Procedure} ex.Server: {ex.Server} ex.Source: {ex.Source} ex.TargetSite: {ex.TargetSite} ex.InnerException: {ex.InnerException} ex.StackTrace: {ex.StackTrace} ex.HelpLink: {ex.HelpLink} ex.Data: {ex.Data} ex.HResult: {ex.HResult} ex.GetType: {ex.GetType()} ex.GetType().Name: {ex.GetType().Name} ex.GetType().FullName: {ex.GetType().FullName} ex.GetType().AssemblyQualifiedName: {ex.GetType().AssemblyQualifiedName} ex.GetType().BaseType: {ex.GetType().BaseType} ex.GetType().GUID: {ex.GetType().GUID} ex.GetType().IsCOMObject: {ex.GetType().IsCOMObject} ex.GetType().IsInterface: {ex.GetType().IsInterface} ex.GetType().IsArray: {ex.GetType().IsArray} ex.GetType().IsByRef: {ex.GetType().IsByRef} ex.GetType().IsPointer: {ex.GetType().IsPointer} ex.GetType().IsPrimitive: {ex.GetType().IsPrimitive} ex.GetType().IsValueType: {ex.GetType().IsValueType} ex.GetType().IsEnum: {ex.GetType().IsEnum} ex.GetType().IsGenericType: {ex.GetType().IsGenericType} ex.GetType().IsGenericTypeDefinition: {ex.GetType().IsGenericTypeDefinition} ex.GetType().IsConstructedGenericType: {ex.GetType().IsConstructedGenericType} ex.GetType().IsGenericParameter: {ex.GetType().IsGenericParameter} ex.GetType().IsSecurityCritical: {ex.GetType().IsSecurityCritical} ex.GetType().IsSecuritySafeCritical: {ex.GetType().IsSecuritySafeCritical} ex.GetType().IsSecurityTransparent: {ex.GetType().IsSecurityTransparent} ex.GetType().IsVisible: {ex.GetType().IsVisible} ex.GetType().IsNotPublic: {ex.GetType().IsNotPublic} ex.GetType().IsPublic: {ex.GetType().IsPublic} ex.GetType().IsNestedPublic: {ex.GetType().IsNestedPublic} ex.GetType().IsNestedPrivate: {ex.GetType().IsNestedPrivate} ex.GetType().IsNestedFamily: {ex.GetType().IsNestedFamily} ex.GetType().IsNestedAssembly: {ex.GetType().IsNestedAssembly} ex.GetType().IsNestedFamANDAssem: {ex.GetType().IsNestedFamANDAssem} ex.GetType().Is");
+                    File.AppendAllText(logFilePath, $"{formattedDateTime} C# SqlClient {driverVersion} unrecognized error: {ex.Message} for server '{server}:{port}' with options: encryption={encryption}, trust_server_certificate={trustServerCertificate}, read_only={applicationIntent}.\n");
+                    return 8;
                 }
-                throw;
             }
+        }
+    }
+
+    static void printResult(int errorBits, string driverVersion, string server, int port)
+    {
+        DateTime currentTime = DateTime.Now;
+        string formattedDateTime = currentTime.ToString("[yyyy-MM-dd HH:mm:ss]");
+
+        if (errorBits == 0)
+        {
+            Console.WriteLine($"{formattedDateTime} All tests passed for endpoint '{server}:{port}' with driver 'C# SqlClient {driverVersion}'");
+        }
+        else if (errorBits == 1)
+        {
+            Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} server error: server '{server}:{port}' is not reachable.");
+
+        }
+        else if (errorBits == 2)
+        {
+            Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} database error: Database does not exist on server '{server}:{port}'.");
+        }
+        else if (errorBits == 4)
+        {
+            Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} login error: Wrong credentials for server '{server}:{port}'.");
+        }
+        else if (errorBits == 8)
+        {
+            Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} unrecognized error: Unrecognized error for server '{server}:{port}'. Please check the log file for more details.");
+        }
+        else
+        {
+            Console.WriteLine($"{formattedDateTime} C# SqlClient {driverVersion} multiple errors: Multiple errors for server '{server}:{port}'. Please check the log file for more details.");
         }
     }
 }

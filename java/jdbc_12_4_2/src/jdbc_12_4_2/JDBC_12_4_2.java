@@ -100,7 +100,7 @@ public class JDBC_12_4_2 {
                                     + ":" + port + "' is not reachable.");
                         } else if (e.getErrorCode() == 4060 && e.getSQLState().equals("S0001")) {
                             System.out.println(
-                                    "[" + printCurrentTime() + "] JDBC " + driverVersion + " login error: Database '"
+                                    "[" + printCurrentTime() + "] JDBC " + driverVersion + " database error: Database '"
                                             + database + "' does not exist on server " + server + ":" + port + ".");
                         } else {
                             System.out.println(

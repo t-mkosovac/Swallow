@@ -5,6 +5,7 @@ services:
       context: ${CS_DIR}
       dockerfile: ${DOCKERFILE}
     volumes:
+      - ${LOGS_DIR}:${DOCKER_LOGS_DIR}
       - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   js:
@@ -12,6 +13,7 @@ services:
       context: ${JS_DIR}
       dockerfile: ${DOCKERFILE}
     volumes:
+      - ${LOGS_DIR}:${DOCKER_LOGS_DIR}
       - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   py:
@@ -19,6 +21,7 @@ services:
       context: ${PY_DIR}
       dockerfile: ${DOCKERFILE}
     volumes:
+      - ${LOGS_DIR}:${DOCKER_LOGS_DIR}
       - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   java12:
@@ -26,6 +29,7 @@ services:
       context: ${JAVA12_DIR}
       dockerfile: ${DOCKERFILE}
     volumes:
+      - ${LOGS_DIR}:${DOCKER_LOGS_DIR}
       - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   java11:
@@ -33,6 +37,7 @@ services:
       context: ${JAVA11_DIR}
       dockerfile: ${DOCKERFILE}
     volumes:
+      - ${LOGS_DIR}:${DOCKER_LOGS_DIR}
       - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}
 
   java10:
@@ -40,4 +45,5 @@ services:
       context: ${JAVA10_DIR}
       dockerfile: ${DOCKERFILE}
     volumes:
+      - ${LOGS_DIR}:${DOCKER_LOGS_DIR}
       - ${CONFIG_FILE_PATH}:${DOCKER_CONFIG_FILE_PATH}

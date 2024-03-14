@@ -7,4 +7,5 @@ __pycache__/
 # Ignore node_modules folders in subfolders
 **/node_modules/
 
-
+# Ignore logs folder
+logs/

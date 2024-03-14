@@ -1,0 +1,17 @@
+{
+  "drivers": ["SqlClient 4.1.1", "ODBC 17"],
+  "endpoints": [
+    {
+      "server": "4.245.92.227",
+      "port": 1433,
+      "database": "master",
+      "username": "sa",
+      "password": "Password123",
+      "options": {
+        "useEncryption": [true],
+        "trustServerCertificate": [true],
+        "readOnly": [true, false]
+      }
+    }
+  ]
+}
